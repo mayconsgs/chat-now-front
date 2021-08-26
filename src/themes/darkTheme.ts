@@ -17,7 +17,21 @@ const theme = createTheme({
     },
     text: {
       primary: "#fff",
-      secondary: "#000",
+      secondary: "#888",
+    },
+  },
+  typography: {
+    h4: {
+      color: "#A866E4",
+    },
+    caption: {
+      color: "949D9E",
+    },
+  },
+  props: {
+    MuiTextField: {
+      fullWidth: true,
+      variant: "outlined",
     },
   },
   shape: {

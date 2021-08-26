@@ -4,52 +4,44 @@ import {
   Card,
   CardContent,
   Container,
-  createStyles,
-  makeStyles,
   TextField,
-  Theme,
   Typography,
 } from "@material-ui/core";
 import { Person } from "@material-ui/icons";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    large: {
-      width: theme.spacing(12),
-      height: theme.spacing(12),
-    },
-  })
-);
+import { useTranslation } from "react-i18next";
 
 const SignUp = () => {
-  const classes = useStyles();
+  const { t } = useTranslation(["signUp"]);
 
   return (
     <Container maxWidth="xs">
       <Card>
         {" "}
         <CardContent>
-          <Typography variant="h4" color="secondary">
-            Cadastro
-          </Typography>
+          <Typography variant="h4">{t("signUp:cadastro")}</Typography>
 
-          <Avatar className={classes.large}>
+          <Avatar>
             <Person fontSize="default" />
           </Avatar>
 
           <form>
-            <TextField variant="outlined" label="Nome" fullWidth />
-            <TextField variant="outlined" label="Sobrenome" fullWidth />
-            <TextField variant="outlined" label="E-mail" fullWidth />
-            <TextField variant="outlined" label="Senha" fullWidth />
-            <TextField variant="outlined" label="Repetir senha" fullWidth />
+            <TextField label={t("signUp:nome")} />
+            <TextField label={t("signUp:sobrenome")} />
+            <TextField label={t("signUp:email")} />
+            <TextField label={t("signUp:senha")} />
+            <TextField label={t("signUp:repetirSenha")} />
 
-            <Button type="submit" variant="contained" color="secondary">
-              Cadastrar
+            <Button
+              disableElevation
+              type="submit"
+              variant="contained"
+              color="secondary"
+            >
+              {t("signUp:cadastrar")}
             </Button>
-            <Typography variant="caption">Já possui conta?</Typography>
+            <Typography variant="caption">{t("signUp:possuiConta")}</Typography>
             <Button variant="outlined" color="secondary">
-              Entrar
+              {t("signUp:entrar")}
             </Button>
           </form>
         </CardContent>

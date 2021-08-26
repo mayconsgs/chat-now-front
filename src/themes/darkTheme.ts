@@ -4,13 +4,13 @@ const theme = createTheme({
   palette: {
     primary: {
       main: "#10A8C8",
-      light: "#61dafb",
-      dark: "#007997",
+      light: "#3fb9d3",
+      dark: "#0b758c",
     },
     secondary: {
       main: "#A866E4",
-      light: "#dc96ff",
-      dark: "#7638b1",
+      light: "#b984e9",
+      dark: "#75479f",
     },
     background: {
       paper: "rgba(255, 255, 255, 0.12)",
@@ -32,6 +32,18 @@ const theme = createTheme({
     MuiTextField: {
       fullWidth: true,
       variant: "outlined",
+    },
+    MuiButton: {
+      size: "large",
+    },
+  },
+  overrides: {
+    MuiOutlinedInput: {
+      notchedOutline: {
+        borderColor: "#10A8C8",
+        border: "2px solid ",
+        background: "rgba(255, 255, 255, 0.12)",
+      },
     },
   },
   shape: {

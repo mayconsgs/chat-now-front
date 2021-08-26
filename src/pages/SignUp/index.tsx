@@ -11,6 +11,7 @@ import {
 import { Person } from "@material-ui/icons";
 import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import api from "../../services/api";
 import signUpStyle from "./styles";
 
 const SignUp = () => {
@@ -25,7 +26,7 @@ const SignUp = () => {
   const [repetPassword, setRepetPassword] = useState("");
   const [avatar, setAvatar] = useState<File>();
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
 
     if (password.trim() !== repetPassword.trim()) return;
@@ -37,7 +38,9 @@ const SignUp = () => {
       password: password.trim(),
     };
 
-    console.log(form);
+    const response = await api.post("/users", form, { withCredentials: true });
+
+    console.log(response.data);
   }
 
   return (

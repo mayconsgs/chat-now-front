@@ -1,15 +1,18 @@
 import { ThemeProvider } from "@material-ui/core";
+import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import SignUp from "./pages/SignUp";
+import Routes from "./routes";
 import darkTheme from "./themes/darkTheme";
 
 const App = () => {
   return (
-    <AuthProvider>
+    <BrowserRouter>
       <ThemeProvider theme={darkTheme}>
-        <SignUp></SignUp>
+        <AuthProvider>
+          <Routes />
+        </AuthProvider>
       </ThemeProvider>
-    </AuthProvider>
+    </BrowserRouter>
   );
 };
 

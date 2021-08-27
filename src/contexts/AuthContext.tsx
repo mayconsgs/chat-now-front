@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import api from "../services/api";
 
 export interface UserProps {
@@ -27,12 +28,19 @@ export const AuthContext = createContext<AuthContextData>({
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<UserProps>();
+  const history = useHistory();
 
   useEffect(() => {
-    api.get("/users/me").then(({ data }) => {
-      setUser(data);
-    });
-  }, []);
+    api
+      .get("/users/me")
+      .then(({ data }) => {
+        setUser(data);
+      })
+      .catch((err) => {
+        console.table(err);
+        history.push("/sign-in");
+      });
+  }, [history]);
 
   return (
     <AuthContext.Provider value={{ user, hasUser: user ? true : false }}>

@@ -7,10 +7,10 @@ export interface UserProps {
   firstName: string;
   lastName?: string;
   bio?: string;
-  email: string;
-  shareCode: string;
+  email?: string;
+  shareCode?: string;
   avatarUrl?: string;
-  fullName: string;
+  fullName?: string;
 }
 
 interface AuthContextData {

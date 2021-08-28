@@ -14,6 +14,7 @@ const theme = createTheme({
     },
     background: {
       paper: "rgba(255, 255, 255, 0.12)",
+      default: "#121212",
     },
     text: {
       primary: "#fff",
@@ -21,12 +22,12 @@ const theme = createTheme({
     },
   },
   typography: {
-    h4: {
-      color: "#A866E4",
-    },
-    caption: {
-      color: "949D9E",
-    },
+    // h4: {
+    //   color: "#A866E4",
+    // },
+    // caption: {
+    //   color: "949D9E",
+    // },
   },
   props: {
     MuiTextField: {
@@ -43,6 +44,18 @@ const theme = createTheme({
         borderColor: "#10A8C8",
         border: "2px solid ",
         background: "rgba(255, 255, 255, 0.12)",
+      },
+    },
+    MuiCssBaseline: {
+      "@global": {
+        "#root": {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        "#root, body, html": {
+          minHeight: "100vh",
+        },
       },
     },
   },

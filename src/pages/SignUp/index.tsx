@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import { Person } from "@material-ui/icons";
+
 import { useContext } from "react";
 import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -59,9 +59,7 @@ const SignUp = () => {
             </Grid>
 
             <Grid item container justifyContent="center">
-              <Avatar className={style.avatar}>
-                <Person className={style.iconAvatar} />
-              </Avatar>
+              <Avatar className={style.avatar} />
             </Grid>
 
             <Grid

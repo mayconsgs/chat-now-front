@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@material-ui/core";
+import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Routes from "./routes";
@@ -8,6 +8,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
         <AuthProvider>
           <Routes />
         </AuthProvider>

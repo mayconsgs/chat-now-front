@@ -9,22 +9,27 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Person } from "@material-ui/icons";
+import { useContext } from "react";
 import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
 import api from "../../services/api";
 import signUpStyle from "./styles";
 
 const SignUp = () => {
   const { t } = useTranslation(["signUp"]);
+  const history = useHistory();
   const style = signUpStyle();
+  const { setUser } = useContext(AuthContext);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [bio, setBio] = useState("");
+  // const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repetPassword, setRepetPassword] = useState("");
-  const [avatar, setAvatar] = useState<File>();
+  // const [avatar, setAvatar] = useState<File>();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -38,9 +43,9 @@ const SignUp = () => {
       password: password.trim(),
     };
 
-    const response = await api.post("/users", form, { withCredentials: true });
+    const { data } = await api.post("/users", form, { withCredentials: true });
 
-    console.log(response.data);
+    setUser(data);
   }
 
   return (
@@ -138,7 +143,12 @@ const SignUp = () => {
                 </Grid>
                 <Grid item container>
                   {" "}
-                  <Button variant="outlined" fullWidth color="secondary">
+                  <Button
+                    onClick={() => history.push("/sign-in")}
+                    variant="outlined"
+                    fullWidth
+                    color="secondary"
+                  >
                     {t("signUp:entrar")}
                   </Button>
                 </Grid>

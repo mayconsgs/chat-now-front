@@ -15,6 +15,7 @@ export interface UserProps {
 
 interface AuthContextData {
   user?: UserProps;
+  setUser: (user?: UserProps) => void;
   hasUser: boolean;
 }
 
@@ -24,6 +25,7 @@ interface AuthProviderProps {
 
 export const AuthContext = createContext<AuthContextData>({
   hasUser: false,
+  setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -38,12 +40,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       })
       .catch((err) => {
         console.table(err);
-        history.push("/sign-in");
       });
   }, [history]);
 
+  useEffect(() => {
+    if (!user) {
+      history.push("/sign-in");
+    } else {
+      history.push("/");
+    }
+  }, [user, history]);
+
   return (
-    <AuthContext.Provider value={{ user, hasUser: user ? true : false }}>
+    <AuthContext.Provider
+      value={{ user, setUser, hasUser: user ? true : false }}
+    >
       {children}
     </AuthContext.Provider>
   );

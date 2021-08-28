@@ -2,11 +2,11 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 import api from "../services/api";
 import { UserProps } from "./AuthContext";
 
-interface ViewProps {
+export interface ViewProps {
   visualizedAt: string;
 }
 
-interface MessageProps {
+export interface MessageProps {
   id: string;
   text: string;
   sendedAt: string;
@@ -15,7 +15,7 @@ interface MessageProps {
   views: ViewProps[];
 }
 
-interface ChatProps {
+export interface ChatProps {
   isGroup: boolean;
   title: string;
   description: string;
@@ -27,17 +27,24 @@ interface ChatProps {
 
 interface ChatContextData {
   chats: ChatProps[];
-  openChat?: object;
+  opennedChat?: ChatProps;
+  openChatId?: string;
+  setOpenChatId: (id: string) => void;
 }
 
 interface ChatProviderProps {
   children: ReactNode;
 }
 
-export const ChatContext = createContext<ChatContextData>({ chats: [] });
+export const ChatContext = createContext<ChatContextData>({
+  chats: [],
+  setOpenChatId: (id) => {},
+});
 
 export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [chats, setChats] = useState([]);
+  const [openChatId, setOpenChatId] = useState<string>();
+  const [opennedChat, setopenedChat] = useState<ChatProps>();
 
   useEffect(() => {
     api.get("/chats").then(({ data }) => {
@@ -45,8 +52,17 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (openChatId)
+      api.get(`/chats/${openChatId}`).then(({ data }) => {
+        setopenedChat(data);
+      });
+  }, [openChatId]);
+
   return (
-    <ChatContext.Provider value={{ chats, openChat: undefined }}>
+    <ChatContext.Provider
+      value={{ chats, opennedChat, openChatId, setOpenChatId }}
+    >
       {children}
     </ChatContext.Provider>
   );

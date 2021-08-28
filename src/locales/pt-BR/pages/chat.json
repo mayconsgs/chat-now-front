@@ -1,3 +1,6 @@
 {
-  "ola": "Olá "
+  "ola": "Olá ",
+  "newMessagePlaceholder": "Digite uma mensagem",
+  "copiar": "Copiar código do chat",
+  "snackMessage": "Código Copiado"
 }

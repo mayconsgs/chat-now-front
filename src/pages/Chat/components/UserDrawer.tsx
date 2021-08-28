@@ -2,57 +2,59 @@ import {
   AppBar,
   Avatar,
   Drawer,
-  Grid,
+  IconButton,
   List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Toolbar,
   Typography,
 } from "@material-ui/core";
-import { useContext } from "react";
+import { Delete } from "@material-ui/icons";
+import { Fragment, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { ChatContext } from "../../../contexts/ChatContext";
+import { chatStyle } from "../styles";
+import ChatListItem from "./ChatListItem";
 
 const UserDrawer = () => {
   const { t } = useTranslation(["chat"]);
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const { chats } = useContext(ChatContext);
 
+  const styles = chatStyle();
+
   return (
-    <Drawer variant="permanent" anchor="left">
+    <Fragment>
       <AppBar position="relative">
         <Toolbar>
-          <Avatar alt={user?.fullName} src={user?.avatarUrl} />
-          <Grid item container direction="column">
-            <Grid item>
-              <Typography variant="h5">
-                {t("chat:ola") + user?.firstName}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography>2 conversas não lidas</Typography>
-            </Grid>
-          </Grid>
+          <Avatar className={styles.appBarAvatar} />
+          <Typography className={styles.expandFlex} variant="h5">
+            {t("chat:ola") + user?.firstName}
+          </Typography>
+          <IconButton onClick={() => setUser(undefined)}>
+            <Delete />
+          </IconButton>
         </Toolbar>
       </AppBar>
-      <List>
-        {chats.map((chat) => {
-          const lastMessage =
-            chat.messages[0]?.text || "Seja o primeiro a mandar uma mensagem";
-
-          return (
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar />
-              </ListItemAvatar>
-              <ListItemText primary={chat.title} secondary={lastMessage} />
-            </ListItem>
-          );
-        })}
-      </List>
-    </Drawer>
+      <Drawer
+        classes={{
+          paper: styles.drawerPaper,
+        }}
+        variant="permanent"
+        anchor="left"
+      >
+        <List>
+          {chats.map((chat, index) => {
+            return (
+              <ChatListItem
+                key={chat.shareCode}
+                chat={chat}
+                next={chats[index + 1]}
+              />
+            );
+          })}
+        </List>
+      </Drawer>
+    </Fragment>
   );
 };
 

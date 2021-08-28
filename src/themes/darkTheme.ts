@@ -21,14 +21,6 @@ const theme = createTheme({
       secondary: "#888",
     },
   },
-  typography: {
-    // h4: {
-    //   color: "#A866E4",
-    // },
-    // caption: {
-    //   color: "949D9E",
-    // },
-  },
   props: {
     MuiTextField: {
       fullWidth: true,

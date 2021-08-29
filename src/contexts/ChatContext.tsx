@@ -1,6 +1,14 @@
-import { createContext, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import api from "../services/api";
-import { UserProps } from "./AuthContext";
+import { AuthContext, UserProps } from "./AuthContext";
 
 export interface ViewProps {
   visualizedAt: string;
@@ -30,6 +38,8 @@ interface ChatContextData {
   opennedChat?: ChatProps;
   openChatId?: string;
   setOpenChatId: (id: string) => void;
+  chatListSocket?: Socket<DefaultEventsMap, DefaultEventsMap>;
+  chatSocket?: Socket<DefaultEventsMap, DefaultEventsMap>;
 }
 
 interface ChatProviderProps {
@@ -42,9 +52,16 @@ export const ChatContext = createContext<ChatContextData>({
 });
 
 export const ChatProvider = ({ children }: ChatProviderProps) => {
+  const { user } = useContext(AuthContext);
   const [chats, setChats] = useState([]);
   const [openChatId, setOpenChatId] = useState<string>();
   const [opennedChat, setopenedChat] = useState<ChatProps>();
+
+  const [chatListSocket, setChatListSocket] = useState(
+    io(`${process.env.REACT_APP_API_URL}/${user?.id}`)
+  );
+  const [chatSocket, setChatSocket] =
+    useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
 
   useEffect(() => {
     api.get("/chats").then(({ data }) => {
@@ -53,11 +70,20 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   }, []);
 
   useEffect(() => {
-    if (openChatId)
-      api.get(`/chats/${openChatId}`).then(({ data }) => {
-        setopenedChat(data);
-      });
+    if (!openChatId) return;
+
+    api.get(`/chats/${openChatId}`).then(({ data }) => {
+      setopenedChat(data);
+    });
+
+    setChatSocket(io(`${process.env.REACT_APP_API_URL}/${openChatId}`));
   }, [openChatId]);
+
+  chatListSocket.on("updateList", () => {
+    api.get("/chats").then(({ data }) => {
+      setChats(data);
+    });
+  });
 
   return (
     <ChatContext.Provider

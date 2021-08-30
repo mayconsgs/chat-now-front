@@ -1,14 +1,8 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { Component, createContext, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import api from "../services/api";
-import { AuthContext, UserProps } from "./AuthContext";
+import { UserProps } from "./AuthContext";
 
 export interface ViewProps {
   visualizedAt: string;
@@ -37,9 +31,8 @@ interface ChatContextData {
   chats: ChatProps[];
   opennedChat?: ChatProps;
   openChatId?: string;
-  setOpenChatId: (id: string) => void;
-  chatListSocket?: Socket<DefaultEventsMap, DefaultEventsMap>;
-  chatSocket?: Socket<DefaultEventsMap, DefaultEventsMap>;
+  onOpenChat: (id: string) => void;
+  socket?: Socket<DefaultEventsMap, DefaultEventsMap>;
 }
 
 interface ChatProviderProps {
@@ -48,48 +41,76 @@ interface ChatProviderProps {
 
 export const ChatContext = createContext<ChatContextData>({
   chats: [],
-  setOpenChatId: (id) => {},
+  onOpenChat: (id) => {},
 });
 
-export const ChatProvider = ({ children }: ChatProviderProps) => {
-  const { user } = useContext(AuthContext);
-  const [chats, setChats] = useState([]);
-  const [openChatId, setOpenChatId] = useState<string>();
-  const [opennedChat, setopenedChat] = useState<ChatProps>();
+interface ChatProviderState {
+  chatsList: ChatProps[];
+  openChatId?: string;
+  opennedChat?: ChatProps;
+}
 
-  const [chatListSocket, setChatListSocket] = useState(
-    io(`${process.env.REACT_APP_API_URL}/${user?.id}`)
-  );
-  const [chatSocket, setChatSocket] =
-    useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
+export class ChatProvider extends Component<{}, ChatProviderState> {
+  socket = io(process.env.REACT_APP_API_URL!);
 
-  useEffect(() => {
+  constructor(props: ChatProviderProps) {
+    super(props);
+
+    this.state = {
+      chatsList: [],
+    };
+  }
+
+  componentDidMount() {
     api.get("/chats").then(({ data }) => {
-      setChats(data);
+      this.setState({
+        chatsList: data,
+      });
+
+      this.socket.emit(
+        "chatList",
+        this.state.chatsList.map((e: ChatProps) => e.shareCode)
+      );
     });
-  }, []);
 
-  useEffect(() => {
-    if (!openChatId) return;
+    this.socket.on("newMessage", (chatId: string, message: MessageProps) => {
+      const chat = this.state.chatsList.find((e) => e.shareCode === chatId);
+      if (!chat) return;
+      const newChats = this.state.chatsList.filter(
+        (e) => e.shareCode !== chatId
+      );
 
-    api.get(`/chats/${openChatId}`).then(({ data }) => {
-      setopenedChat(data);
+      chat.messages[0] = message;
+
+      this.setState({
+        chatsList: [chat].concat(newChats || []),
+      });
     });
+  }
 
-    setChatSocket(io(`${process.env.REACT_APP_API_URL}/${openChatId}`));
-  }, [openChatId]);
+  render() {
+    return (
+      <ChatContext.Provider
+        value={{
+          chats: this.state.chatsList,
+          openChatId: this.state.openChatId,
+          opennedChat: this.state.opennedChat,
+          socket: this.socket,
 
-  chatListSocket.on("updateList", () => {
-    api.get("/chats").then(({ data }) => {
-      setChats(data);
-    });
-  });
+          // Essa parte ficou feia, eu sei, em breve pretendo melhorar
+          onOpenChat: (id: string) => {
+            this.setState({
+              openChatId: id,
+            });
 
-  return (
-    <ChatContext.Provider
-      value={{ chats, opennedChat, openChatId, setOpenChatId }}
-    >
-      {children}
-    </ChatContext.Provider>
-  );
-};
+            api.get(`/chats/${id}`).then(({ data }) => {
+              this.setState({ opennedChat: data });
+            });
+          },
+        }}
+      >
+        {this.props.children}
+      </ChatContext.Provider>
+    );
+  }
+}

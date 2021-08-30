@@ -5,8 +5,7 @@ import {
   ListItemAvatar,
   ListItemText,
 } from "@material-ui/core";
-import { useContext } from "react";
-import { FC, Fragment } from "react";
+import { FC, Fragment, useContext } from "react";
 import { ChatContext, ChatProps } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
 
@@ -19,7 +18,8 @@ const ChatListItem: FC<ChatListItemProps> = ({ chat, next }) => {
   const lastMessage =
     chat.messages[0]?.text || "Seja o primeiro a mandar uma mensagem";
   const styles = chatStyle();
-  const { setOpenChatId } = useContext(ChatContext);
+  const { onOpenChat: setOpenChatId } = useContext(ChatContext);
+  const { openChatId } = useContext(ChatContext);
 
   return (
     <Fragment>
@@ -29,7 +29,11 @@ const ChatListItem: FC<ChatListItemProps> = ({ chat, next }) => {
         max={99}
         badgeContent={1}
       > */}
-      <ListItem button onClick={() => setOpenChatId(chat.shareCode)}>
+      <ListItem
+        button
+        selected={openChatId === chat.shareCode}
+        onClick={() => setOpenChatId(chat.shareCode)}
+      >
         <ListItemAvatar>
           <Avatar />
         </ListItemAvatar>

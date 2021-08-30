@@ -26,6 +26,8 @@ const OpennedChat = () => {
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const styles = chatStyle();
 
+  const { socket } = useContext(ChatContext);
+
   function submitMessage(e: FormEvent) {
     e.preventDefault();
 
@@ -33,8 +35,9 @@ const OpennedChat = () => {
       .post(`/chats/${openChatId}/messages`, {
         text: newMessage.trim(),
       })
-      .then(() => {
+      .then(({ data: message }) => {
         setNewMessage("");
+        socket?.emit("sendMessage", openChatId, message);
       });
   }
 

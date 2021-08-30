@@ -1,5 +1,7 @@
-import { createTheme } from "@material-ui/core/styles";
+import { createTheme, responsiveFontSizes } from "@material-ui/core/styles";
 
-const lightTheme = createTheme({});
+const theme = createTheme({});
+
+const lightTheme = responsiveFontSizes(theme);
 
 export default lightTheme;

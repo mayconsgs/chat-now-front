@@ -1,7 +1,7 @@
 import { Container, Grid } from "@material-ui/core";
 import { ChatProvider } from "../../contexts/ChatContext";
-import OpennedChat from "./components/OpennedChat";
-import UserDrawer from "./components/UserDrawer";
+import OpennedChat from "./components/ChatComponent";
+import UserDrawer from "./components/ChatsList";
 import { chatStyle } from "./styles";
 
 const Chat = () => {
@@ -9,7 +9,7 @@ const Chat = () => {
 
   return (
     <ChatProvider>
-      <Container>
+      <Container disableGutters>
         <Grid container direction="row" wrap="nowrap">
           <Grid item>
             <Container maxWidth="xl" className={styles.container}>

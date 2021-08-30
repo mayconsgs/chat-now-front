@@ -1,45 +1,32 @@
 import {
   AppBar,
   Avatar,
-  Fab,
-  Grid,
+  Box,
   IconButton,
-  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Slide,
   Snackbar,
-  TextField,
   Toolbar,
   Tooltip,
   Typography,
 } from "@material-ui/core";
-import { Close, FileCopy, Send } from "@material-ui/icons";
-import { FormEvent, Fragment, useContext, useState } from "react";
+import { Close, FileCopy } from "@material-ui/icons";
+import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
 import { ChatContext } from "../../../contexts/ChatContext";
-import api from "../../../services/api";
 import { chatStyle } from "../styles";
+import MessageFormComponent from "./MessageFormComponent";
 
 const OpennedChat = () => {
   const { t } = useTranslation(["chat"]);
-  const { opennedChat: openedChat, openChatId } = useContext(ChatContext);
-  const [newMessage, setNewMessage] = useState("");
-  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const { openedChat } = useContext(ChatContext);
+
   const styles = chatStyle();
 
-  const { socket } = useContext(ChatContext);
-
-  function submitMessage(e: FormEvent) {
-    e.preventDefault();
-
-    api
-      .post(`/chats/${openChatId}/messages`, {
-        text: newMessage.trim(),
-      })
-      .then(({ data: message }) => {
-        setNewMessage("");
-        socket?.emit("sendMessage", openChatId, message);
-      });
-  }
+  const [openSnackBar, setOpenSnackBar] = useState(false);
 
   async function copyShareCode() {
     await navigator.clipboard.writeText(openedChat?.shareCode!);
@@ -52,6 +39,29 @@ const OpennedChat = () => {
     }
 
     setOpenSnackBar(false);
+  }
+
+  function renderMessage(props: ListChildComponentProps) {
+    const { index, style } = props;
+    const currentMessage = openedChat?.messages[index];
+    const contatUser =
+      openedChat?.messages[index - 1]?.user.id === currentMessage?.user.id;
+
+    return (
+      <ListItem style={style}>
+        {contatUser ? (
+          <Fragment />
+        ) : (
+          <ListItemAvatar>
+            <Avatar />
+          </ListItemAvatar>
+        )}
+        <ListItemText
+          primary={contatUser ? undefined : currentMessage?.user.fullName}
+          secondary={currentMessage?.text}
+        />
+      </ListItem>
+    );
   }
 
   return (
@@ -72,35 +82,20 @@ const OpennedChat = () => {
           </Tooltip>
         </Toolbar>
       </AppBar>
-      <List>
-        {openedChat?.messages.map((message) => {
-          return <Typography key={message.id}>{message.text}</Typography>;
-        })}
-      </List>
 
-      <Grid
-        container
-        direction="row"
-        wrap="nowrap"
-        spacing={2}
-        component="form"
-        onSubmit={submitMessage}
-      >
-        <Grid item className={styles.expandFlex}>
-          <TextField
-            required
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onInvalid={(e) => e.preventDefault()}
-            placeholder={t("chat:newMessagePlaceholder")}
-          />
-        </Grid>
-        <Grid item>
-          <Fab color="secondary" type="submit">
-            <Send />
-          </Fab>
-        </Grid>
-      </Grid>
+      <Box>
+        <FixedSizeList
+          height={720}
+          width="100%"
+          itemSize={70}
+          itemCount={openedChat?.messages.length || 0}
+          style={{ direction: "revert" }}
+        >
+          {renderMessage}
+        </FixedSizeList>
+      </Box>
+
+      <MessageFormComponent />
 
       <Snackbar
         anchorOrigin={{

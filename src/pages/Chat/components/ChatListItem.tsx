@@ -1,8 +1,10 @@
 import {
   Avatar,
+  Badge,
   Divider,
   ListItem,
   ListItemAvatar,
+  ListItemSecondaryAction,
   ListItemText,
 } from "@material-ui/core";
 import { FC, Fragment, useContext } from "react";
@@ -11,15 +13,15 @@ import { chatStyle } from "../styles";
 
 interface ChatListItemProps {
   chat: ChatProps;
-  next?: ChatProps;
+  hasNext: boolean;
 }
 
-const ChatListItem: FC<ChatListItemProps> = ({ chat, next }) => {
+const ChatListItem: FC<ChatListItemProps> = ({ chat, hasNext }) => {
   const lastMessage =
     chat.messages[0]?.text || "Seja o primeiro a mandar uma mensagem";
   const styles = chatStyle();
   const { onOpenChat: setOpenChatId } = useContext(ChatContext);
-  const { openChatId } = useContext(ChatContext);
+  const { openedChatId: openChatId } = useContext(ChatContext);
 
   return (
     <Fragment>
@@ -45,9 +47,12 @@ const ChatListItem: FC<ChatListItemProps> = ({ chat, next }) => {
           primary={chat.title}
           secondary={lastMessage}
         />
+        <ListItemSecondaryAction>
+          <Badge color="secondary" max={99} badgeContent={100} />
+        </ListItemSecondaryAction>
       </ListItem>
       {/* </Badge> */}
-      {next && <Divider />}
+      {hasNext && <Divider />}
     </Fragment>
   );
 };

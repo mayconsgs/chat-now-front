@@ -52,9 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [user, history]);
 
   return (
-    <AuthContext.Provider
-      value={{ user, setUser, hasUser: user ? true : false }}
-    >
+    <AuthContext.Provider value={{ user, setUser, hasUser: Boolean(user) }}>
       {children}
     </AuthContext.Provider>
   );

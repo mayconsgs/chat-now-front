@@ -26,15 +26,15 @@ export interface ChatProps {
   users: UserProps[];
   messages: MessageProps[];
 }
-
 interface ChatContextData {
   chats: ChatProps[];
-  opennedChat?: ChatProps;
-  openChatId?: string;
+  openedChat?: ChatProps;
+  openedChatId?: string;
   onOpenChat: (id: string) => void;
   socket?: Socket<DefaultEventsMap, DefaultEventsMap>;
 }
 
+interface ChatProviderProps {}
 interface ChatProviderState {
   chatsList: ChatProps[];
   openChatId?: string;
@@ -46,10 +46,13 @@ export const ChatContext = createContext<ChatContextData>({
   onOpenChat: (id) => {},
 });
 
-export class ChatProvider extends Component<{}, ChatProviderState> {
+export class ChatProvider extends Component<
+  ChatProviderProps,
+  ChatProviderState
+> {
   socket = io(process.env.REACT_APP_API_URL!);
 
-  constructor(props: any) {
+  constructor(props: ChatProviderProps) {
     super(props);
 
     this.state = {
@@ -79,7 +82,21 @@ export class ChatProvider extends Component<{}, ChatProviderState> {
       chat.messages[0] = message;
 
       this.setState({
-        chatsList: [chat].concat(newChats || []),
+        chatsList: [chat, ...newChats],
+      });
+
+      if (chatId !== this.state.openChatId) return;
+
+      this.setState((state) => {
+        const opennedChat = JSON.parse(
+          JSON.stringify(state.opennedChat)
+        ) as ChatProps;
+
+        opennedChat.messages.push(message);
+
+        return {
+          opennedChat,
+        };
       });
     });
   }
@@ -89,12 +106,12 @@ export class ChatProvider extends Component<{}, ChatProviderState> {
       <ChatContext.Provider
         value={{
           chats: this.state.chatsList,
-          openChatId: this.state.openChatId,
-          opennedChat: this.state.opennedChat,
+          openedChatId: this.state.openChatId,
+          openedChat: this.state.opennedChat,
           socket: this.socket,
 
           // Essa parte ficou feia, eu sei, em breve pretendo melhorar
-          onOpenChat: (id: string) => {
+          onOpenChat: (id) => {
             this.setState({
               openChatId: id,
             });

@@ -9,7 +9,9 @@ export const chatStyle = makeStyles((theme: Theme) =>
       overflowY: "auto",
     },
     breakText: {
-      width: "280px",
+      width: "30vw",
+      maxWidth: "250px",
+      minWidth: "180px",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
       overflow: "hidden",
@@ -23,6 +25,7 @@ export const chatStyle = makeStyles((theme: Theme) =>
     appBarAvatar: {
       marginRight: theme.spacing(2),
     },
+
     expandFlex: {
       flexGrow: 1,
     },

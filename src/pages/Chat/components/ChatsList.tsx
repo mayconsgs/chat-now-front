@@ -1,7 +1,6 @@
 import {
   AppBar,
   Avatar,
-  Drawer,
   IconButton,
   List,
   Menu,
@@ -55,25 +54,17 @@ const UserDrawer = () => {
           </Menu>
         </Toolbar>
       </AppBar>
-      <Drawer
-        classes={{
-          paper: styles.drawerPaper,
-        }}
-        variant="permanent"
-        anchor="left"
-      >
-        <List>
-          {chats.map((chat, index) => {
-            return (
-              <ChatListItem
-                key={chat.shareCode}
-                chat={chat}
-                next={chats[index + 1]}
-              />
-            );
-          })}
-        </List>
-      </Drawer>
+      <List>
+        {chats.map((chat, index) => {
+          return (
+            <ChatListItem
+              key={chat.shareCode}
+              chat={chat}
+              hasNext={Boolean(chats[index + 1])}
+            />
+          );
+        })}
+      </List>
     </Fragment>
   );
 };

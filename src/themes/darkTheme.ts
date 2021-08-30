@@ -18,8 +18,12 @@ const theme = createTheme({
     },
     text: {
       primary: "#fff",
-      secondary: "#888",
+      secondary: "#949D9E",
     },
+    action: {
+      selected: "rgba(97, 218, 251, 0.26)",
+    },
+    divider: "#787878",
   },
   props: {
     MuiTextField: {
@@ -28,6 +32,9 @@ const theme = createTheme({
     },
     MuiButton: {
       size: "large",
+    },
+    MuiFab: {
+      color: "secondary",
     },
   },
   overrides: {

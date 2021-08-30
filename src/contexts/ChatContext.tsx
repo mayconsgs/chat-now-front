@@ -1,4 +1,4 @@
-import { Component, createContext, ReactNode } from "react";
+import { Component, createContext } from "react";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import api from "../services/api";
@@ -35,8 +35,10 @@ interface ChatContextData {
   socket?: Socket<DefaultEventsMap, DefaultEventsMap>;
 }
 
-interface ChatProviderProps {
-  children: ReactNode;
+interface ChatProviderState {
+  chatsList: ChatProps[];
+  openChatId?: string;
+  opennedChat?: ChatProps;
 }
 
 export const ChatContext = createContext<ChatContextData>({
@@ -44,16 +46,10 @@ export const ChatContext = createContext<ChatContextData>({
   onOpenChat: (id) => {},
 });
 
-interface ChatProviderState {
-  chatsList: ChatProps[];
-  openChatId?: string;
-  opennedChat?: ChatProps;
-}
-
 export class ChatProvider extends Component<{}, ChatProviderState> {
   socket = io(process.env.REACT_APP_API_URL!);
 
-  constructor(props: ChatProviderProps) {
+  constructor(props: any) {
     super(props);
 
     this.state = {

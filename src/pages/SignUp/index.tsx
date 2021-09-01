@@ -8,9 +8,7 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-
-import { useContext } from "react";
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -29,9 +27,10 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repetPassword, setRepetPassword] = useState("");
-  // const [avatar, setAvatar] = useState<File>();
+  const [avatar, setAvatar] = useState<File>();
+  const [avatarPreview, setAvatarPreview] = useState<string>();
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (password.trim() !== repetPassword.trim()) return;
@@ -41,11 +40,26 @@ const SignUp = () => {
       lastName: lastName.trim(),
       email: email.trim(),
       password: password.trim(),
+      avatar,
     };
 
-    const { data } = await api.post("/users", form, { withCredentials: true });
+    api
+      .post("/users", form, { withCredentials: true })
+      .then(({ data }) => setUser(data));
+  }
 
-    setUser(data);
+  function getAvatar(e: ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files?.length) return;
+    setAvatar(e.target.files[0]);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(e.target.files[0]);
+    reader.onload = () => {
+      if (reader.result) {
+        const preview = reader.result as string;
+        setAvatarPreview(preview);
+      }
+    };
   }
 
   return (
@@ -59,7 +73,9 @@ const SignUp = () => {
             </Grid>
 
             <Grid item container justifyContent="center">
-              <Avatar className={style.avatar} />
+              <label htmlFor="#input-avatar">
+                <Avatar src={avatarPreview} className={style.avatar} />
+              </label>
             </Grid>
 
             <Grid
@@ -71,6 +87,13 @@ const SignUp = () => {
               onSubmit={onSubmit}
             >
               <Grid item container direction="column" spacing={2}>
+                <input
+                  style={{ display: "none" }}
+                  type="file"
+                  id="#input-avatar"
+                  accept="image/png, image/jpg, image/jpeg"
+                  onChange={getAvatar}
+                />
                 <Grid item container>
                   <TextField
                     value={firstName}

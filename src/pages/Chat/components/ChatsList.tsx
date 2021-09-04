@@ -2,7 +2,9 @@ import {
   AppBar,
   Avatar,
   IconButton,
-  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Menu,
   MenuItem,
   Toolbar,
@@ -11,15 +13,15 @@ import {
 import { MoreVert } from "@material-ui/icons";
 import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
 import { AuthContext } from "../../../contexts/AuthContext";
-import { ChatContext } from "../../../contexts/ChatContext";
+import { ChatContext, ChatProps } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
-import ChatListItem from "./ChatListItem";
 
 const UserDrawer = () => {
   const { t } = useTranslation(["chat"]);
   const { user, setUser } = useContext(AuthContext);
-  const { chats } = useContext(ChatContext);
+  const { chats, onOpenChat, openedChatId } = useContext(ChatContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -31,6 +33,40 @@ const UserDrawer = () => {
   }
 
   const styles = chatStyle();
+
+  function renderChatListItem({
+    index,
+    style,
+    data,
+  }: ListChildComponentProps<ChatProps[]>) {
+    const chat = data[index];
+    const hasNext = Boolean(data[index + 1]);
+
+    const lastMessage =
+      chat.messages[0]?.text || "Seja o primeiro a mandar uma mensagem";
+
+    return (
+      <ListItem
+        button
+        style={style}
+        selected={openedChatId === chat.shareCode}
+        divider={hasNext}
+        onClick={() => onOpenChat(chat.shareCode)}
+      >
+        <ListItemAvatar>
+          <Avatar />
+        </ListItemAvatar>
+        <ListItemText
+          classes={{
+            primary: styles.breakText,
+            secondary: styles.breakText,
+          }}
+          primary={chat.title}
+          secondary={lastMessage}
+        />
+      </ListItem>
+    );
+  }
 
   return (
     <Fragment>
@@ -54,17 +90,15 @@ const UserDrawer = () => {
           </Menu>
         </Toolbar>
       </AppBar>
-      <List>
-        {chats.map((chat, index) => {
-          return (
-            <ChatListItem
-              key={chat.shareCode}
-              chat={chat}
-              hasNext={Boolean(chats[index + 1])}
-            />
-          );
-        })}
-      </List>
+      <FixedSizeList
+        width={400}
+        height={500}
+        itemSize={80}
+        itemCount={chats.length}
+        itemData={chats}
+      >
+        {renderChatListItem}
+      </FixedSizeList>
     </Fragment>
   );
 };

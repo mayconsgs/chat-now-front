@@ -16,7 +16,7 @@ import { Close, FileCopy } from "@material-ui/icons";
 import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
-import { ChatContext } from "../../../contexts/ChatContext";
+import { ChatContext, MessageProps } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
 import MessageFormComponent from "./MessageFormComponent";
 
@@ -41,11 +41,13 @@ const OpennedChat = () => {
     setOpenSnackBar(false);
   }
 
-  function renderMessage(props: ListChildComponentProps) {
-    const { index, style } = props;
-    const currentMessage = openedChat?.messages[index];
-    const contatUser =
-      openedChat?.messages[index - 1]?.user.id === currentMessage?.user.id;
+  function renderMessage({
+    index,
+    style,
+    data,
+  }: ListChildComponentProps<MessageProps[]>) {
+    const currentMessage = data[index];
+    const contatUser = data[index - 1]?.user.id === currentMessage?.user.id;
 
     return (
       <ListItem style={style}>
@@ -85,11 +87,11 @@ const OpennedChat = () => {
 
       <Box>
         <FixedSizeList
-          height={720}
+          height={600}
           width="100%"
-          itemSize={70}
+          itemSize={80}
           itemCount={openedChat?.messages.length || 0}
-          style={{ direction: "revert" }}
+          itemData={openedChat?.messages}
         >
           {renderMessage}
         </FixedSizeList>

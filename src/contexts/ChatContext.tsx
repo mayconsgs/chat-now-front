@@ -92,7 +92,7 @@ export class ChatProvider extends Component<
           JSON.stringify(state.opennedChat)
         ) as ChatProps;
 
-        opennedChat.messages.push(message);
+        opennedChat.messages.unshift(message);
 
         return {
           opennedChat,
@@ -112,6 +112,8 @@ export class ChatProvider extends Component<
 
           // Essa parte ficou feia, eu sei, em breve pretendo melhorar
           onOpenChat: (id) => {
+            if (id === this.state.openChatId) return;
+
             this.setState({
               openChatId: id,
             });

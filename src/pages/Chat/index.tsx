@@ -1,7 +1,7 @@
 import { Container, Grid } from "@material-ui/core";
 import { ChatProvider } from "../../contexts/ChatContext";
 import OpennedChat from "./components/ChatComponent";
-import UserDrawer from "./components/ChatsList";
+import ChatsList from "./components/ChatsList";
 import { chatStyle } from "./styles";
 
 const Chat = () => {
@@ -13,7 +13,7 @@ const Chat = () => {
         <Grid container direction="row" wrap="nowrap">
           <Grid item>
             <Container maxWidth="xl" className={styles.container}>
-              <UserDrawer />
+              <ChatsList />
             </Container>
           </Grid>
           <Grid item className={styles.expandFlex}>

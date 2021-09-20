@@ -65,7 +65,6 @@ const SignUp = () => {
   return (
     <Container maxWidth="xs">
       <Card>
-        {" "}
         <CardContent>
           <Grid container direction="column" spacing={5}>
             <Grid item>
@@ -157,13 +156,11 @@ const SignUp = () => {
                   </Button>
                 </Grid>
                 <Grid item>
-                  {" "}
                   <Typography variant="caption">
                     {t("signUp:possuiConta")}
                   </Typography>
                 </Grid>
                 <Grid item container>
-                  {" "}
                   <Button
                     onClick={() => history.push("/sign-in")}
                     variant="outlined"

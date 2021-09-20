@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { ReactComponent as Logo } from "../assets/logo.svg";
 import api from "../services/api";
 
 export interface UserProps {
@@ -16,7 +17,6 @@ export interface UserProps {
 interface AuthContextData {
   user?: UserProps;
   setUser: (user?: UserProps) => void;
-  hasUser: boolean;
 }
 
 interface AuthProviderProps {
@@ -24,12 +24,12 @@ interface AuthProviderProps {
 }
 
 export const AuthContext = createContext<AuthContextData>({
-  hasUser: false,
   setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<UserProps>();
+  const [loading, setLoading] = useState(true);
   const history = useHistory();
 
   useEffect(() => {
@@ -40,6 +40,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       })
       .catch((err) => {
         console.table(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 3000);
       });
   }, [history]);
 
@@ -52,8 +57,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [user, history]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, hasUser: Boolean(user) }}>
-      {children}
+    <AuthContext.Provider value={{ user, setUser }}>
+      {loading ? <Logo /> : children}
     </AuthContext.Provider>
   );
 };

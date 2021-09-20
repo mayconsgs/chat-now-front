@@ -3,9 +3,6 @@ import {
   Avatar,
   Box,
   IconButton,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Slide,
   Snackbar,
   Toolbar,
@@ -15,9 +12,10 @@ import {
 import { Close, FileCopy } from "@material-ui/icons";
 import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
+import { ListChildComponentProps, VariableSizeList } from "react-window";
 import { ChatContext, MessageProps } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
+import ChatBalloon from "./ChatBalloon";
 import MessageFormComponent from "./MessageFormComponent";
 
 const OpennedChat = () => {
@@ -50,21 +48,32 @@ const OpennedChat = () => {
     const contatUser = data[index - 1]?.user.id === currentMessage?.user.id;
 
     return (
-      <ListItem style={style}>
-        {contatUser ? (
-          <Fragment />
-        ) : (
-          <ListItemAvatar>
-            <Avatar />
-          </ListItemAvatar>
-        )}
-        <ListItemText
-          primary={contatUser ? undefined : currentMessage?.user.fullName}
-          secondary={currentMessage?.text}
-        />
-      </ListItem>
+      <ChatBalloon
+        contatUser={contatUser}
+        message={currentMessage}
+        style={style}
+      />
     );
   }
+
+  const rowHeight = openedChat?.messages.map((currentMessage, index) => {
+    const contatUser =
+      openedChat?.messages[index - 1]?.user.id === currentMessage?.user.id;
+
+    const lines = Math.floor(currentMessage.text.length / 133 + 1);
+
+    const height = lines * (56 / 3) + (contatUser ? 16 : 20);
+
+    if (!contatUser && height < 40) return 40;
+
+    return height;
+  });
+
+  const getItemSize = (index: number) => {
+    if (!rowHeight) return 80;
+
+    return rowHeight[index];
+  };
 
   return (
     <Fragment>
@@ -86,15 +95,15 @@ const OpennedChat = () => {
       </AppBar>
 
       <Box>
-        <FixedSizeList
+        <VariableSizeList
           height={600}
           width="100%"
-          itemSize={80}
+          itemSize={getItemSize}
           itemCount={openedChat?.messages.length || 0}
           itemData={openedChat?.messages}
         >
           {renderMessage}
-        </FixedSizeList>
+        </VariableSizeList>
       </Box>
 
       <MessageFormComponent />

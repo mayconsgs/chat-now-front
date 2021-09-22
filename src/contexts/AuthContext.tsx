@@ -38,13 +38,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .then(({ data }) => {
         setUser(data);
       })
-      .catch((err) => {
-        console.table(err);
-      })
       .finally(() => {
-        setTimeout(() => {
-          setLoading(false);
-        }, 3000);
+        setLoading(false);
       });
   }, [history]);
 

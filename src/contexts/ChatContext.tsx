@@ -87,17 +87,30 @@ export class ChatProvider extends Component<
 
       if (chatId !== this.state.openChatId) return;
 
+      let scrollAfter = false;
+      const element = document.getElementById("messages-display");
+
+      if (element?.scrollHeight === (element?.scrollTop || 0) + 600)
+        scrollAfter = true;
+
       this.setState((state) => {
         const opennedChat = JSON.parse(
           JSON.stringify(state.opennedChat)
         ) as ChatProps;
 
-        opennedChat.messages.unshift(message);
+        opennedChat.messages.push(message);
 
         return {
           opennedChat,
         };
       });
+
+      if (scrollAfter) {
+        element?.scrollTo({
+          top: (element?.scrollHeight || 0) - 600,
+          behavior: "smooth",
+        });
+      }
     });
   }
 

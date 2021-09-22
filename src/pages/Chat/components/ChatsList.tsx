@@ -65,6 +65,11 @@ const ChatsList = () => {
       });
   }
 
+  async function joinChat() {
+    const chatId = await navigator.clipboard.readText();
+    api.patch(`/chats/${chatId}/join`);
+  }
+
   async function logOut() {
     await api.post("logout");
     setUser();
@@ -108,7 +113,7 @@ const ChatsList = () => {
     <Fragment>
       <AppBar position="relative">
         <Toolbar>
-          <Avatar className={styles.appBarAvatar} />
+          <Avatar src={user?.avatarUrl} className={styles.appBarAvatar} />
           <Typography className={styles.expandFlex} variant="h5">
             {t("chat:ola") + user?.firstName}
           </Typography>
@@ -122,8 +127,9 @@ const ChatsList = () => {
             keepMounted
             anchorEl={anchorEl}
           >
-            <MenuItem onClick={logOut}>SignOut</MenuItem>
+            <MenuItem onClick={joinChat}>Adicionar novo Chat</MenuItem>
             <MenuItem onClick={openNewChatModal}>Criar novo Chat</MenuItem>
+            <MenuItem onClick={logOut}>SignOut</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
@@ -143,6 +149,7 @@ const ChatsList = () => {
           <Grid
             container
             sm
+            item
             direction="column"
             component="form"
             onSubmit={onSubmitNewChat}

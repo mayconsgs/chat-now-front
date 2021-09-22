@@ -9,7 +9,7 @@ const Chat = () => {
 
   return (
     <ChatProvider>
-      <Container disableGutters>
+      <Container disableGutters style={{ height: "720px" }}>
         <Grid container direction="row" wrap="nowrap">
           <Grid item>
             <Container maxWidth="xl" className={styles.container}>

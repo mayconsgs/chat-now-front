@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
+import FormData from "form-data";
 import { ChangeEvent, FormEvent, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
@@ -35,31 +36,23 @@ const SignUp = () => {
 
     if (password.trim() !== repetPassword.trim()) return;
 
-    const form = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      avatar,
-    };
+    const form = new FormData();
 
-    api
-      .post("/users", form, { withCredentials: true })
-      .then(({ data }) => setUser(data));
+    form.append("firstName", firstName.trim());
+    form.append("email", email.trim());
+    form.append("password", password.trim());
+    if (lastName.trim().length) form.append("lastName", lastName.trim());
+    if (avatar) form.append("avatar", avatar);
+
+    api.post("/users", form).then(({ data }) => setUser(data));
   }
 
   function getAvatar(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files?.length) return;
     setAvatar(e.target.files[0]);
 
-    const reader = new FileReader();
-    reader.readAsDataURL(e.target.files[0]);
-    reader.onload = () => {
-      if (reader.result) {
-        const preview = reader.result as string;
-        setAvatarPreview(preview);
-      }
-    };
+    const src = URL.createObjectURL(e.target.files[0]);
+    setAvatarPreview(src);
   }
 
   return (

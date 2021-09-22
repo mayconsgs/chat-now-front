@@ -2,6 +2,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Grid,
   IconButton,
   Slide,
   Snackbar,
@@ -12,8 +13,8 @@ import {
 import { Close, FileCopy } from "@material-ui/icons";
 import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ListChildComponentProps, VariableSizeList } from "react-window";
-import { ChatContext, MessageProps } from "../../../contexts/ChatContext";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { ChatContext } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
 import ChatBalloon from "./ChatBalloon";
 import MessageFormComponent from "./MessageFormComponent";
@@ -21,6 +22,7 @@ import MessageFormComponent from "./MessageFormComponent";
 const OpennedChat = () => {
   const { t } = useTranslation(["chat"]);
   const { openedChat } = useContext(ChatContext);
+  const { user } = useContext(AuthContext);
 
   const styles = chatStyle();
 
@@ -38,42 +40,6 @@ const OpennedChat = () => {
 
     setOpenSnackBar(false);
   }
-
-  function renderMessage({
-    index,
-    style,
-    data,
-  }: ListChildComponentProps<MessageProps[]>) {
-    const currentMessage = data[index];
-    const contatUser = data[index - 1]?.user.id === currentMessage?.user.id;
-
-    return (
-      <ChatBalloon
-        contatUser={contatUser}
-        message={currentMessage}
-        style={style}
-      />
-    );
-  }
-
-  const rowHeight = openedChat?.messages.map((currentMessage, index) => {
-    const contatUser =
-      openedChat?.messages[index - 1]?.user.id === currentMessage?.user.id;
-
-    const lines = Math.floor(currentMessage.text.length / 133 + 1);
-
-    const height = lines * (56 / 3) + (contatUser ? 16 : 20);
-
-    if (!contatUser && height < 40) return 40;
-
-    return height;
-  });
-
-  const getItemSize = (index: number) => {
-    if (!rowHeight) return 80;
-
-    return rowHeight[index];
-  };
 
   return (
     <Fragment>
@@ -94,16 +60,30 @@ const OpennedChat = () => {
         </Toolbar>
       </AppBar>
 
-      <Box>
-        <VariableSizeList
-          height={600}
-          width="100%"
-          itemSize={getItemSize}
-          itemCount={openedChat?.messages.length || 0}
-          itemData={openedChat?.messages}
-        >
-          {renderMessage}
-        </VariableSizeList>
+      <Box
+        paddingBottom="2rem"
+        height="calc(720px - 64px - 64px)"
+        overflow="auto"
+        id="messages-display"
+      >
+        <Grid container direction="column">
+          {openedChat?.messages.map((currentMessage, index) => {
+            const contatUser =
+              openedChat.messages[index - 1]?.user.id ===
+              currentMessage?.user.id;
+            const sended = currentMessage.user.id === user?.id;
+
+            return (
+              <Grid item key={currentMessage.id}>
+                <ChatBalloon
+                  contatUser={contatUser}
+                  message={currentMessage}
+                  isSended={sended}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
       </Box>
 
       <MessageFormComponent />

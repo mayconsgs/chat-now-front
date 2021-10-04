@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash";
 import { Component, createContext } from "react";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
@@ -39,6 +40,7 @@ interface ChatProviderState {
   chatsList: ChatProps[];
   openChatId?: string;
   opennedChat?: ChatProps;
+  page: number;
 }
 
 export const ChatContext = createContext<ChatContextData>({
@@ -57,6 +59,7 @@ export class ChatProvider extends Component<
 
     this.state = {
       chatsList: [],
+      page: 0,
     };
   }
 
@@ -81,33 +84,30 @@ export class ChatProvider extends Component<
 
       chat.messages[0] = message;
 
-      this.setState({
-        chatsList: [chat, ...newChats],
-      });
-
-      if (chatId !== this.state.openChatId) return;
+      if (chatId !== this.state.openChatId) {
+        this.setState({ chatsList: [chat, ...newChats] });
+        return;
+      }
 
       let scrollAfter = false;
       const element = document.getElementById("messages-display");
 
-      if (element?.scrollHeight === (element?.scrollTop || 0) + 600)
+      if (element?.scrollHeight === (element?.scrollTop || 0) + 592)
         scrollAfter = true;
 
       this.setState((state) => {
-        const opennedChat = JSON.parse(
-          JSON.stringify(state.opennedChat)
-        ) as ChatProps;
-
-        opennedChat.messages.push(message);
+        const opennedChat = cloneDeep(state.opennedChat);
+        opennedChat?.messages.push(message);
 
         return {
           opennedChat,
+          chatsList: [chat, ...newChats],
         };
       });
 
       if (scrollAfter) {
-        element?.scrollTo({
-          top: (element?.scrollHeight || 0) - 600,
+        element?.scroll({
+          top: (element?.scrollHeight || 0) - 592,
           behavior: "smooth",
         });
       }
@@ -122,18 +122,33 @@ export class ChatProvider extends Component<
           openedChatId: this.state.openChatId,
           openedChat: this.state.opennedChat,
           socket: this.socket,
-
-          // Essa parte ficou feia, eu sei, em breve pretendo melhorar
-          onOpenChat: (id) => {
+          onOpenChat: async (id) => {
             if (id === this.state.openChatId) return;
 
-            this.setState({
-              openChatId: id,
-            });
+            try {
+              const [chatResponse, messagesResponse] = await Promise.all([
+                api.get(`/chats/${id}`),
+                api.get(`/chats/${id}/messages`),
+              ]);
 
-            api.get(`/chats/${id}`).then(({ data }) => {
-              this.setState({ opennedChat: data });
-            });
+              const messages =
+                (messagesResponse.data.data as MessageProps[]) || [];
+              const opennedChat = { ...chatResponse.data, messages } as
+                | ChatProps
+                | undefined;
+
+              opennedChat?.messages.sort(
+                (a, b) =>
+                  Number(new Date(a.sendedAt)) - Number(new Date(b.sendedAt))
+              );
+
+              this.setState({ opennedChat, openChatId: id });
+
+              const element = document.getElementById("messages-display");
+              element?.scroll({
+                top: (element?.scrollHeight || 0) - 592,
+              });
+            } catch (error) {}
           },
         }}
       >

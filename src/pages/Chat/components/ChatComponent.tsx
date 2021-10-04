@@ -70,11 +70,11 @@ const OpennedChat = () => {
           {openedChat?.messages.map((currentMessage, index) => {
             const contatUser =
               openedChat.messages[index - 1]?.user.id ===
-              currentMessage?.user.id;
+              currentMessage.user.id;
             const sended = currentMessage.user.id === user?.id;
 
             return (
-              <Grid item key={currentMessage.id}>
+              <Grid item key={`message_${currentMessage.id}`}>
                 <ChatBalloon
                   contatUser={contatUser}
                   message={currentMessage}

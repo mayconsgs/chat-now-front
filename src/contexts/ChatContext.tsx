@@ -1,7 +1,6 @@
 import { cloneDeep } from "lodash";
 import { Component, createContext } from "react";
 import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from "socket.io-client/build/typed-events";
 import api from "../services/api";
 import { UserProps } from "./AuthContext";
 
@@ -31,8 +30,11 @@ interface ChatContextData {
   chats: ChatProps[];
   openedChat?: ChatProps;
   openedChatId?: string;
+  socket?: Socket;
+  messagesCount: number;
+  hasNext: boolean;
+  loadMore?: () => void;
   onOpenChat: (id: string) => void;
-  socket?: Socket<DefaultEventsMap, DefaultEventsMap>;
 }
 
 interface ChatProviderProps {}
@@ -41,11 +43,21 @@ interface ChatProviderState {
   openChatId?: string;
   opennedChat?: ChatProps;
   page: number;
+  messagesCount: number;
+  hasNext: boolean;
+}
+
+interface PaginateResponseData {
+  data: MessageProps[];
+  next_page_url: string | null;
+  total: number;
 }
 
 export const ChatContext = createContext<ChatContextData>({
   chats: [],
   onOpenChat: (id) => {},
+  hasNext: false,
+  messagesCount: 0,
 });
 
 export class ChatProvider extends Component<
@@ -60,6 +72,8 @@ export class ChatProvider extends Component<
     this.state = {
       chatsList: [],
       page: 0,
+      messagesCount: 0,
+      hasNext: false,
     };
   }
 
@@ -90,7 +104,7 @@ export class ChatProvider extends Component<
       }
 
       let scrollAfter = false;
-      const element = document.getElementById("messages-display");
+      const element = document.getElementsByClassName("messages-display")[0];
 
       if (element?.scrollHeight === (element?.scrollTop || 0) + 592)
         scrollAfter = true;
@@ -102,6 +116,7 @@ export class ChatProvider extends Component<
         return {
           opennedChat,
           chatsList: [chat, ...newChats],
+          messagesCount: state.messagesCount + 1,
         };
       });
 
@@ -122,6 +137,8 @@ export class ChatProvider extends Component<
           openedChatId: this.state.openChatId,
           openedChat: this.state.opennedChat,
           socket: this.socket,
+          hasNext: this.state.hasNext,
+          messagesCount: this.state.messagesCount,
           onOpenChat: async (id) => {
             if (id === this.state.openChatId) return;
 
@@ -131,20 +148,30 @@ export class ChatProvider extends Component<
                 api.get(`/chats/${id}/messages`),
               ]);
 
-              const messages =
-                (messagesResponse.data.data as MessageProps[]) || [];
-              const opennedChat = { ...chatResponse.data, messages } as
-                | ChatProps
-                | undefined;
+              const {
+                data: messages,
+                next_page_url,
+                total: messagesCount,
+              } = messagesResponse.data as PaginateResponseData;
+              const opennedChat = {
+                ...chatResponse.data,
+                messages,
+              } as ChatProps;
 
-              opennedChat?.messages.sort(
+              opennedChat.messages.sort(
                 (a, b) =>
                   Number(new Date(a.sendedAt)) - Number(new Date(b.sendedAt))
               );
 
-              this.setState({ opennedChat, openChatId: id });
+              this.setState({
+                opennedChat,
+                openChatId: id,
+                messagesCount,
+                hasNext: Boolean(next_page_url),
+              });
 
-              const element = document.getElementById("messages-display");
+              const element =
+                document.getElementsByClassName("messages-display")[0];
               element?.scroll({
                 top: (element?.scrollHeight || 0) - 592,
               });

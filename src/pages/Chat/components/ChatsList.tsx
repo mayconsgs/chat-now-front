@@ -67,7 +67,7 @@ const ChatsList = () => {
 
   async function joinChat() {
     const chatId = await navigator.clipboard.readText();
-    api.patch(`/chats/${chatId}/join`);
+    await api.patch(`/chats/${chatId}/join`);
   }
 
   async function logOut() {

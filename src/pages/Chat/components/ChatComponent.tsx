@@ -2,17 +2,19 @@ import {
   AppBar,
   Avatar,
   Box,
-  Grid,
   IconButton,
   Slide,
   Snackbar,
   Toolbar,
   Tooltip,
   Typography,
+  useTheme,
 } from "@material-ui/core";
 import { Close, FileCopy } from "@material-ui/icons";
 import { Fragment, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { VariableSizeList } from "react-window";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { ChatContext } from "../../../contexts/ChatContext";
 import { chatStyle } from "../styles";
@@ -23,10 +25,31 @@ const OpennedChat = () => {
   const { t } = useTranslation(["chat"]);
   const { openedChat } = useContext(ChatContext);
   const { user } = useContext(AuthContext);
+  const theme = useTheme();
 
   const styles = chatStyle();
 
   const [openSnackBar, setOpenSnackBar] = useState(false);
+
+  const messagesHeight = openedChat?.messages.map((message, index) => {
+    let height = theme.spacing(2);
+    const contatUser =
+      openedChat?.messages[index - 1]?.user.id === message.user.id;
+    const sended = message.user.id === user?.id;
+
+    height = Math.floor((message.text.length / 62 + 1) * theme.spacing(3));
+
+    if (contatUser) {
+      height = height - theme.spacing(0.5);
+    } else {
+      height = height + theme.spacing(2);
+    }
+
+    return height;
+  });
+
+  const getMessageHeight = (index: number) =>
+    messagesHeight ? messagesHeight[index] : 0;
 
   async function copyShareCode() {
     await navigator.clipboard.writeText(openedChat?.shareCode!);
@@ -64,26 +87,35 @@ const OpennedChat = () => {
         paddingBottom="2rem"
         height="calc(720px - 64px - 64px)"
         overflow="auto"
-        id="messages-display"
       >
-        <Grid container direction="column">
-          {openedChat?.messages.map((currentMessage, index) => {
-            const contatUser =
-              openedChat.messages[index - 1]?.user.id ===
-              currentMessage.user.id;
-            const sended = currentMessage.user.id === user?.id;
+        <AutoSizer>
+          {({ height, width }) => (
+            <VariableSizeList
+              height={height}
+              width={width}
+              itemData={openedChat?.messages}
+              itemCount={openedChat?.messages.length || 0}
+              itemSize={getMessageHeight}
+              className="messages-display"
+            >
+              {({ style, index, data }) => {
+                const currentMessage = data[index];
+                const contatUser =
+                  data[index - 1]?.user.id === currentMessage.user.id;
+                const sended = currentMessage.user.id === user?.id;
 
-            return (
-              <Grid item key={`message_${currentMessage.id}`}>
-                <ChatBalloon
-                  contatUser={contatUser}
-                  message={currentMessage}
-                  isSended={sended}
-                />
-              </Grid>
-            );
-          })}
-        </Grid>
+                return (
+                  <ChatBalloon
+                    contatUser={contatUser}
+                    message={currentMessage}
+                    isSended={sended}
+                    style={style}
+                  />
+                );
+              }}
+            </VariableSizeList>
+          )}
+        </AutoSizer>
       </Box>
 
       <MessageFormComponent />

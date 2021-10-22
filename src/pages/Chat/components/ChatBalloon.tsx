@@ -5,13 +5,14 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import { FC } from "react";
+import { CSSProperties, FC } from "react";
 import { MessageProps } from "../../../contexts/ChatContext";
 
 interface ChatBalloonProps {
   message: MessageProps;
   contatUser: boolean;
   isSended: boolean;
+  style: CSSProperties;
 }
 
 const ChatBalloonStyle = makeStyles((theme: Theme) =>
@@ -46,6 +47,7 @@ const ChatBalloon: FC<ChatBalloonProps> = ({
   message,
   contatUser,
   isSended,
+  style,
 }) => {
   const chatStyle = ChatBalloonStyle();
 
@@ -57,7 +59,7 @@ const ChatBalloon: FC<ChatBalloonProps> = ({
     textContainerClasses.push(chatStyle.addSpaceImage);
   }
   if (isSended) {
-    rootClasses.push(chatStyle.sended);
+    textContainerClasses.push(chatStyle.sended);
   } else {
   }
   if (contatUser) {
@@ -65,7 +67,7 @@ const ChatBalloon: FC<ChatBalloonProps> = ({
   }
 
   return (
-    <div className={rootClasses.join(" ")}>
+    <div style={style} className={rootClasses.join(" ")}>
       {!isSended && !contatUser && <Avatar src={message.user.avatarUrl} />}
       <div className={textContainerClasses.join(" ")}>
         {!isSended && !contatUser && (
